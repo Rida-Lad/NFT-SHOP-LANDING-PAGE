@@ -4,27 +4,12 @@ import '../index.css'; // Import your CSS file
 import { ArrowRight, Flame, Zap, Star } from 'lucide-react';
 
 const HeroSection = () => {
-    const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
     const [isLoaded, setIsLoaded] = useState(false);
 
-    // Handle parallax effect
+    // Set loaded state after a small delay for entrance animations
     useEffect(() => {
-        const handleMouseMove = (e) => {
-            setMousePosition({
-                x: e.clientX / window.innerWidth - 0.5,
-                y: e.clientY / window.innerHeight - 0.5,
-            });
-        };
-
-        window.addEventListener('mousemove', handleMouseMove);
-
-        // Set loaded state after small delay for entrance animations
         const timer = setTimeout(() => setIsLoaded(true), 100);
-
-        return () => {
-            window.removeEventListener('mousemove', handleMouseMove);
-            clearTimeout(timer);
-        };
+        return () => clearTimeout(timer);
     }, []);
 
     return (
@@ -35,25 +20,6 @@ const HeroSection = () => {
                 background: 'radial-gradient(circle at center, rgb(30, 30, 30) 0%, rgb(0, 0, 0) 70%)'
             }}
         >
-            {/* Animated background glow */}
-            <div
-                className="absolute inset-0 bg-gradient-to-br from-red-900/40 via-orange-900/20 to-transparent"
-                style={{
-                    filter: 'blur(120px)',
-                    transform: `translate(${mousePosition.x * 30}px, ${mousePosition.y * 30}px)`,
-                    transition: 'transform 0.3s ease-out'
-                }}
-            ></div>
-
-            {/* Grid pattern overlay */}
-            <div
-                className="absolute inset-0 bg-grid-pattern opacity-30"
-                style={{
-                    backgroundSize: '50px 50px',
-                    backgroundImage: 'linear-gradient(to right, rgb(60, 60, 60, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgb(60, 60, 60, 0.1) 1px, transparent 1px)'
-                }}
-            ></div>
-
             {/* Logo with animated reveal */}
             <div
                 className={`relative mb-8 transition-all duration-1000 transform ${isLoaded ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'}`}
