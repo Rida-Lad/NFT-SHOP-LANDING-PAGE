@@ -1,7 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, Heart, DollarSign, Zap } from 'lucide-react';
-
-// Import SVGs as URLs
+import React, { useState, useEffect, useRef } from 'react';
 import svg1 from '../assets/svg1.svg';
 import svg2 from '../assets/svg2.svg';
 import svg3 from '../assets/svg3.svg';
@@ -11,162 +8,208 @@ import svg6 from '../assets/svg6.svg';
 import svg7 from '../assets/svg7.svg';
 
 const NFTCarousel = () => {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [isAutoplay, setIsAutoplay] = useState(true);
-
-  // Array of SVG URLs
-  const svgUrls = [svg1, svg2, svg3, svg4, svg5, svg6, svg7];
-
+  const [startIndex, setStartIndex] = useState(0);
+  const [visibleCount, setVisibleCount] = useState(3);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const carouselRef = useRef(null);
+  
+  // Array of NFT data
   const nfts = [
-    { id: 1, name: "Cosmic Void #238", price: 3.45, likes: 284, creator: "0xNebula", trending: true },
-    { id: 2, name: "Cyber Punk Ape", price: 5.78, likes: 512, creator: "MetaLord", trending: true },
-    { id: 3, name: "Abstract Mindset", price: 2.12, likes: 189, creator: "ArtificialDreamer", trending: false },
-    { id: 4, name: "Ethereal Being", price: 8.92, likes: 743, creator: "0xGhost", trending: true },
-    { id: 5, name: "Digital Genesis", price: 1.56, likes: 132, creator: "BlockchainArtist", trending: false },
-    { id: 6, name: "Quantum Reality", price: 4.33, likes: 298, creator: "QuantumCreator", trending: false },
-    { id: 7, name: "Neon Dystopia", price: 6.21, likes: 478, creator: "CyberNomad", trending: true },
+    { id: 1, image: svg1, name: "CryptoPunk #3429", price: "120.5 ETH", creator: "0xDead...beef" },
+    { id: 2, image: svg2, name: "Bored Ape #8756", price: "98.2 ETH", creator: "0xF00d...cafe" },
+    { id: 3, image: svg3, name: "Azuki #4532", price: "32.7 ETH", creator: "0xBabe...face" },
+    { id: 4, image: svg4, name: "Doodle #9087", price: "15.3 ETH", creator: "0xC0de...0123" },
+    { id: 5, image: svg5, name: "CloneX #2345", price: "45.8 ETH", creator: "0xAce1...7890" },
+    { id: 6, image: svg6, name: "Moonbirds #6789", price: "28.6 ETH", creator: "0xB00b...1337" },
+    { id: 7, image: svg7, name: "DeGods #1234", price: "52.9 ETH", creator: "0xD0ge...4200" },
   ];
 
+  // Set number of visible NFTs based on screen size
   useEffect(() => {
-    if (!isAutoplay) return;
+    const handleResize = () => {
+      if (window.innerWidth < 640) {
+        setVisibleCount(1);
+      } else if (window.innerWidth < 1024) {
+        setVisibleCount(2);
+      } else {
+        setVisibleCount(3);
+      }
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Intersection observer for animation trigger
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // When 50% of the element is visible
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
+          setIsVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.5 } // Trigger when 50% visible
+    );
+
+    if (carouselRef.current) {
+      observer.observe(carouselRef.current);
+    }
+
+    return () => {
+      if (carouselRef.current) {
+        observer.unobserve(carouselRef.current);
+      }
+    };
+  }, []);
+
+  // Simple navigation functions with basic animation control
+  const prevSlide = () => {
+    if (isAnimating) return;
     
-    const interval = setInterval(() => {
-      setCurrentIndex((prevIndex) => (prevIndex + 1) % nfts.length);
-    }, 3000);
+    setIsAnimating(true);
+    setStartIndex((prevIndex) => {
+      const newIndex = prevIndex - 1;
+      return newIndex < 0 ? nfts.length - visibleCount : newIndex;
+    });
     
-    return () => clearInterval(interval);
-  }, [isAutoplay, nfts.length]);
+    // Release animation lock after transition
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 400);
+  };
 
   const nextSlide = () => {
-    setIsAutoplay(false);
-    setCurrentIndex((prevIndex) => (prevIndex + 1) % nfts.length);
+    if (isAnimating) return;
+    
+    setIsAnimating(true);
+    setStartIndex((prevIndex) => {
+      const maxStartIndex = nfts.length - visibleCount;
+      const newIndex = prevIndex + 1;
+      return newIndex > maxStartIndex ? 0 : newIndex;
+    });
+    
+    // Release animation lock after transition
+    setTimeout(() => {
+      setIsAnimating(false);
+    }, 400);
   };
 
-  const prevSlide = () => {
-    setIsAutoplay(false);
-    setCurrentIndex((prevIndex) => (prevIndex - 1 + nfts.length) % nfts.length);
-  };
-
-  const goToSlide = (index) => {
-    setIsAutoplay(false);
-    setCurrentIndex(index);
+  // Get the current visible NFTs
+  const visibleNfts = () => {
+    const result = [];
+    for (let i = 0; i < visibleCount; i++) {
+      const index = (startIndex + i) % nfts.length;
+      result.push(nfts[index]);
+    }
+    return result;
   };
 
   return (
-    <div className="bg-black text-white h-screen flex flex-col">
-      <div className="w-full max-w-5xl mx-auto px-4 py-6 flex-1 flex flex-col">
-        <h1 className="text-3xl font-bold mb-2 bg-gradient-to-r from-red-500 to-orange-500 bg-clip-text text-transparent">
-          Top NFT Collections
-        </h1>
-        <p className="text-gray-400 mb-4">Discover the most exclusive digital collectibles</p>
+    <div className="h-screen w-full bg-gradient-to-br from-black via-gray-900 to-red-950 flex flex-col items-center justify-center px-4">
+      {/* Title Section */}
+      <div className={`w-full max-w-6xl mb-12 md:mb-16 text-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <h2 className="font-['Playfair_Display'] text-3xl md:text-4xl lg:text-5xl text-white mb-6 relative inline-block">
+          <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white to-orange-500 animate-wave">
+            Top NFT Collection
+          </span>
+          <span className="absolute -bottom-2 md:-bottom-3 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-orange-500"></span>
+        </h2>
+        <p className="font-['Poppins'] text-gray-400 max-w-2xl mx-auto text-sm md:text-base mt-4">
+          Discover the most exclusive and valuable digital collectibles in the NFT space
+        </p>
+      </div>
+      
+      <div className="w-full max-w-6xl relative" ref={carouselRef}>
+        {/* Navigation buttons - placed outside */}
+        <button 
+          onClick={prevSlide}
+          className={`absolute -left-4 sm:-left-6 md:-left-8 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 sm:p-3 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10 ${
+            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
+          }`}
+          style={{ transitionDelay: '250ms' }}
+          disabled={isAnimating}
+          aria-label="Previous NFT"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
         
-        {/* Main Carousel - takes up most of the space */}
-        <div className="relative overflow-hidden rounded-xl bg-gray-900 shadow-lg flex-1">
-          <div className="absolute inset-0 flex items-center justify-center overflow-hidden">
-            {/* Using regular image tag instead of SVG component */}
-            <div className="w-full h-full flex items-center justify-center">
-              <img 
-                src={svgUrls[currentIndex]} 
-                alt={nfts[currentIndex].name} 
-                className="w-4/5 h-4/5 object-contain"
-              />
-            </div>
-            
-            {/* NFT Info Overlay */}
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent p-4">
-              <div className="flex justify-between items-end">
-                <div>
-                  <div className="flex items-center gap-2 mb-1">
-                    {nfts[currentIndex].trending && (
-                      <div className="bg-red-500 text-xs px-2 py-1 rounded-full flex items-center">
-                        <Zap size={12} className="mr-1" />
-                        Trending
-                      </div>
-                    )}
-                    <div className="text-xs text-gray-400">Created by {nfts[currentIndex].creator}</div>
-                  </div>
-                  <h2 className="text-xl font-bold">{nfts[currentIndex].name}</h2>
-                  <div className="flex items-center gap-4 mt-1">
-                    <div className="flex items-center">
-                      <DollarSign size={16} className="text-orange-400 mr-1" />
-                      <span className="font-bold">{nfts[currentIndex].price} ETH</span>
-                    </div>
-                    <div className="flex items-center">
-                      <Heart size={16} className="text-red-500 mr-1" />
-                      <span>{nfts[currentIndex].likes}</span>
-                    </div>
-                  </div>
-                </div>
-                <button className="bg-gradient-to-r from-red-500 to-orange-500 text-white px-3 py-1 rounded-lg font-medium hover:opacity-90 transition">
-                  View
-                </button>
-              </div>
-            </div>
-          </div>
-          
-          {/* Navigation Buttons */}
-          <button
-            onClick={prevSlide}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-2 text-white transition-all"
-          >
-            <ChevronLeft size={20} />
-          </button>
-          <button
-            onClick={nextSlide}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black bg-opacity-50 hover:bg-opacity-70 rounded-full p-2 text-white transition-all"
-          >
-            <ChevronRight size={20} />
-          </button>
-        </div>
-        
-        {/* Thumbnails */}
-        <div className="flex justify-center mt-3 gap-2">
-          {nfts.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-all ${
-                index === currentIndex
-                  ? "bg-gradient-to-r from-red-500 to-orange-500 w-4"
-                  : "bg-gray-600 hover:bg-gray-500"
-              }`}
-            />
-          ))}
-        </div>
-        
-        {/* NFT Thumbnails Preview - reduced height */}
-        <div className="mt-4 grid grid-cols-4 gap-2">
-          {[...Array(4)].map((_, index) => {
-            const nftIndex = (currentIndex + index) % nfts.length;
-            
-            return (
+        <button 
+          onClick={nextSlide}
+          className={`absolute -right-4 sm:-right-6 md:-right-8 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 sm:p-3 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10 ${
+            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
+          }`}
+          style={{ transitionDelay: '250ms' }}
+          disabled={isAnimating}
+          aria-label="Next NFT"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      
+        <div className="relative">
+          {/* NFT display area */}
+          <div className="flex justify-center sm:justify-between gap-4 py-6 md:py-12">
+            {visibleNfts().map((nft, idx) => (
               <div 
-                key={index} 
-                className="bg-gray-900 rounded-lg overflow-hidden hover:scale-105 transition-transform cursor-pointer"
-                onClick={() => goToSlide(nftIndex)}
+                key={`${nft.id}-${startIndex}`} 
+                className={`${
+                  visibleCount === 1 ? 'w-4/5' : 
+                  visibleCount === 2 ? 'w-1/2' : 'w-1/3'
+                } flex flex-col transition-all duration-500 ${
+                  isVisible 
+                    ? 'opacity-100 translate-y-0' 
+                    : 'opacity-0 translate-y-16'
+                }`}
+                style={{ 
+                  transitionDelay: `${idx * 150}ms`,
+                }}
               >
-                <div className="aspect-square relative flex items-center justify-center p-2">
-                  {/* Using regular image tag instead of SVG component */}
-                  <img 
-                    src={svgUrls[nftIndex]} 
-                    alt={nfts[nftIndex].name} 
-                    className="w-full h-full object-contain"
-                  />
-                  
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent opacity-0 hover:opacity-100 transition-opacity flex items-end p-2">
-                    <div className="w-full">
-                      <div className="flex justify-between items-center">
-                        <div className="text-xs font-medium truncate">{nfts[nftIndex].name}</div>
-                        <div className="text-xs text-orange-400">{nfts[nftIndex].price}</div>
+                <div className="bg-gradient-to-r from-red-800 via-orange-800 to-red-700 p-0.5 rounded-lg shadow-lg hover:shadow-red-500/20 h-full">
+                  <div className="bg-black rounded-lg overflow-hidden flex flex-col h-full">
+                    {/* SVG image (100% width) */}
+                    <div className="w-full overflow-hidden" style={{ height: '200px' }}>
+                      <img src={nft.image} alt={nft.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" />
+                    </div>
+                    {/* NFT info */}
+                    <div className="p-4 md:p-5 lg:p-6 flex-grow flex flex-col">
+                      <div className="flex justify-between items-center mb-3 md:mb-4">
+                        <h3 className="text-orange-500 font-['Poppins'] font-bold text-sm md:text-lg">{nft.name}</h3>
+                        <span className="text-red-400 font-['Poppins'] font-bold text-sm md:text-base">{nft.price}</span>
                       </div>
+                      <div className="border-t border-gray-800 pt-3 mt-3">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-gray-500 font-['Poppins'] text-xs">Creator</span>
+                          <span className="text-orange-300 font-['Poppins'] text-xs font-mono">{nft.creator}</span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-gray-500 font-['Poppins'] text-xs">Collection</span>
+                          <span className="text-orange-300 font-['Poppins'] text-xs">Premium Series</span>
+                        </div>
+                      </div>
+                      <button className="mt-4 w-full py-2 bg-gradient-to-r from-red-700 to-orange-600 text-white rounded font-['Poppins'] text-sm hover:from-red-600 hover:to-orange-500 transition-all duration-300 hover:shadow-lg hover:shadow-red-900/30">
+                        View Details
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
-            );
-          })}
+            ))}
+          </div>
         </div>
       </div>
+      
+      {/* Font imports - Add these to your index.html or CSS file */}
+      <style jsx="true">{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+      `}</style>
     </div>
   );
 };
