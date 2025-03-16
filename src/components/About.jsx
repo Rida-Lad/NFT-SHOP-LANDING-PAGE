@@ -22,7 +22,7 @@ const About = () => {
     const features = [
         { icon: Globe, title: "Global Community", description: "Connect with artists worldwide", gradient: "from-orange-500 to-amber-600" },
         { icon: Code, title: "Innovative Tech", description: "Blockchain-powered security", gradient: "from-red-500 to-orange-600" },
-        { icon: Palette, title: "Creative Freedom", description: "Tools built for artists", gradient: "from-amber-500 to-yellow-600" },
+        { icon: Palette, title: "Creative Freedom", description: "Tools built for artists and more", gradient: "from-amber-500 to-yellow-600" },
         { icon: Users, title: "Supportive Network", description: "Collaborate and grow together", gradient: "from-orange-600 to-red-600" }
     ];
 

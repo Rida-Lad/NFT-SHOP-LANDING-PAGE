@@ -54,15 +54,15 @@ const HowItWorks = () => {
   return (
     <div
       ref={ref}
-      className="min-h-screen w-full bg-gradient-to-br from-black via-gray-900 to-gray-800 flex flex-col items-center justify-center px-4"
+      className="min-h-screen w-full bg-black flex flex-col items-center justify-center px-4 overflow-hidden"
     >
       <div className="max-w-6xl mx-auto text-center">
         {/* MOBILE TOP SPACING ADJUSTMENT */}
         <h2 className="font-['Playfair_Display'] text-3xl md:text-4xl lg:text-5xl text-white mb-6 relative inline-block mt-16 md:mt-0">
-        <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white to-orange-500 animate-wave">
+          <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white to-orange-500 animate-wave">
             How It Works
           </span>
-          <span className="absolute -bottom-2 md:-bottom-3 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-orange-500"></span>
+          <span className="absolute -bottom-2 md:-bottom-3 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-orange-500 animate-underline"></span>
         </h2>
         <p className="font-['Poppins'] text-gray-400 max-w-2xl mx-auto text-sm md:text-base mt-4">
           A simple 3-step process to explore, own, and trade NFTs.
@@ -80,18 +80,25 @@ const HowItWorks = () => {
               }`}
               style={{ transitionDelay: `${index * 200}ms` }}
             >
-              <div className={`bg-gradient-to-r from-${step.variant}-800 via-${step.variant}-700 to-${step.variant}-600 p-0.5 rounded-lg shadow-lg hover:shadow-${step.variant}-500/20 transition-all duration-300`}>
-                <div className="bg-black rounded-lg p-6 md:p-8 flex flex-col items-center text-center h-full min-h-[300px]">
-                  <div className="flex-1 flex items-center justify-center mb-6">
-                  <step.icon 
-                    className={`text-4xl md:text-5xl transition-all duration-300 ${
+              <div className={`p-0.5 rounded-lg shadow-lg hover:shadow-${step.variant}-500/50 transition-all duration-300 hover:scale-105 ${
+                step.variant === 'red' ? 'bg-gradient-to-r from-red-600 to-orange-500' :
+                step.variant === 'purple' ? 'bg-gradient-to-r from-purple-600 to-indigo-500' :
+                step.variant === 'cyan' ? 'bg-gradient-to-r from-cyan-600 to-blue-500' : ''
+              }`}>
+                <div className="bg-black rounded-lg p-6 md:p-8 flex flex-col items-center text-center h-full min-h-[300px] relative overflow-hidden">
+                  {/* Animated Background */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-black via-transparent to-black opacity-20 animate-shimmer"></div>
+                  
+                  <div className="flex-1 flex items-center justify-center mb-6 relative z-10">
+                    <step.icon 
+                      className={`text-4xl md:text-5xl transition-all duration-300 ${
                         step.variant === 'red' ? 'text-red-500 hover:text-red-400' : 
                         step.variant === 'purple' ? 'text-purple-500 hover:text-purple-400' : 
                         step.variant === 'cyan' ? 'text-cyan-500 hover:text-cyan-400' : ''
-                    }`}
+                      }`}
                     />
                   </div>
-                  <h3 className="font-['Poppins'] text-xl md:text-2xl font-bold text-orange-500 mb-4 transition-all duration-300">
+                  <h3 className="font-['Poppins'] text-xl md:text-2xl font-bold text-orange-500 mb-4 transition-all duration-300 hover:text-white">
                     {step.title}
                   </h3>
                   <p className="font-['Poppins'] text-gray-400 text-sm md:text-base">

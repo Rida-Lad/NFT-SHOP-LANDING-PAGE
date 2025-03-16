@@ -13,7 +13,7 @@ const NFTCarousel = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const carouselRef = useRef(null);
-  
+
   // Array of NFT data
   const nfts = [
     { id: 1, image: svg1, name: "CryptoPunk #3429", price: "120.5 ETH", creator: "0xDead...beef" },
@@ -46,13 +46,12 @@ const NFTCarousel = () => {
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {
-        // When 50% of the element is visible
         if (entry.isIntersecting && entry.intersectionRatio >= 0.5) {
           setIsVisible(true);
           observer.disconnect();
         }
       },
-      { threshold: 0.5 } // Trigger when 50% visible
+      { threshold: 0.5 }
     );
 
     if (carouselRef.current) {
@@ -69,14 +68,13 @@ const NFTCarousel = () => {
   // Simple navigation functions with basic animation control
   const prevSlide = () => {
     if (isAnimating) return;
-    
+
     setIsAnimating(true);
     setStartIndex((prevIndex) => {
       const newIndex = prevIndex - 1;
       return newIndex < 0 ? nfts.length - visibleCount : newIndex;
     });
-    
-    // Release animation lock after transition
+
     setTimeout(() => {
       setIsAnimating(false);
     }, 400);
@@ -84,15 +82,14 @@ const NFTCarousel = () => {
 
   const nextSlide = () => {
     if (isAnimating) return;
-    
+
     setIsAnimating(true);
     setStartIndex((prevIndex) => {
       const maxStartIndex = nfts.length - visibleCount;
       const newIndex = prevIndex + 1;
       return newIndex > maxStartIndex ? 0 : newIndex;
     });
-    
-    // Release animation lock after transition
+
     setTimeout(() => {
       setIsAnimating(false);
     }, 400);
@@ -122,10 +119,10 @@ const NFTCarousel = () => {
           Discover the most exclusive and valuable digital collectibles in the NFT space
         </p>
       </div>
-      
+
       <div className="w-full max-w-6xl relative" ref={carouselRef}>
-        {/* Navigation buttons - placed outside */}
-        <button 
+        {/* Navigation buttons */}
+        <button
           onClick={prevSlide}
           className={`absolute -left-4 sm:-left-6 md:-left-8 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 sm:p-3 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10 ${
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
@@ -138,8 +135,8 @@ const NFTCarousel = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        
-        <button 
+
+        <button
           onClick={nextSlide}
           className={`absolute -right-4 sm:-right-6 md:-right-8 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 sm:p-3 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10 ${
             isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
@@ -152,30 +149,37 @@ const NFTCarousel = () => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
-      
+
         <div className="relative">
           {/* NFT display area */}
           <div className="flex justify-center sm:justify-between gap-4 py-6 md:py-12">
             {visibleNfts().map((nft, idx) => (
-              <div 
-                key={`${nft.id}-${startIndex}`} 
+              <div
+                key={`${nft.id}-${startIndex}`}
                 className={`${
-                  visibleCount === 1 ? 'w-4/5' : 
+                  visibleCount === 1 ? 'w-4/5' :
                   visibleCount === 2 ? 'w-1/2' : 'w-1/3'
                 } flex flex-col transition-all duration-500 ${
-                  isVisible 
-                    ? 'opacity-100 translate-y-0' 
+                  isVisible
+                    ? 'opacity-100 translate-y-0'
                     : 'opacity-0 translate-y-16'
                 }`}
-                style={{ 
+                style={{
                   transitionDelay: `${idx * 150}ms`,
                 }}
               >
                 <div className="bg-gradient-to-r from-red-800 via-orange-800 to-red-700 p-0.5 rounded-lg shadow-lg hover:shadow-red-500/20 h-full">
                   <div className="bg-black rounded-lg overflow-hidden flex flex-col h-full">
-                    {/* SVG image (100% width) */}
-                    <div className="w-full overflow-hidden" style={{ height: '200px' }}>
-                      <img src={nft.image} alt={nft.name} className="w-full h-full object-cover transition-transform duration-300 hover:scale-110" />
+                    {/* SVG image with orange filter */}
+                    <div className="w-full overflow-hidden">
+                      <img
+                        src={nft.image}
+                        alt={nft.name}
+                        className="w-full h-auto object-contain transition-transform duration-300 hover:scale-110"
+                        style={{
+                          filter: 'brightness(1.2) saturate(1.5) hue-rotate(-20deg)',
+                        }}
+                      />
                     </div>
                     {/* NFT info */}
                     <div className="p-4 md:p-5 lg:p-6 flex-grow flex flex-col">
@@ -204,11 +208,10 @@ const NFTCarousel = () => {
           </div>
         </div>
       </div>
-      
-      {/* Font imports - Add these to your index.html or CSS file */}
+
+      {/* Font imports */}
       <style jsx="true">{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
-        
       `}</style>
     </div>
   );
