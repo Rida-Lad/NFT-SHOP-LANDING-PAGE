@@ -11,7 +11,6 @@ const NFTCarousel = () => {
   const [startIndex, setStartIndex] = useState(0);
   const [visibleCount, setVisibleCount] = useState(3);
   const [isVisible, setIsVisible] = useState(false);
-  const [isAnimating, setIsAnimating] = useState(false);
   const carouselRef = useRef(null);
 
   // Array of NFT data
@@ -28,16 +27,12 @@ const NFTCarousel = () => {
   // Set number of visible NFTs based on screen size
   useEffect(() => {
     const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setVisibleCount(1);
-      } else if (window.innerWidth < 1024) {
-        setVisibleCount(2);
-      } else {
-        setVisibleCount(3);
-      }
+      if (window.innerWidth < 640) setVisibleCount(1);
+      else if (window.innerWidth < 1024) setVisibleCount(2);
+      else setVisibleCount(3);
     };
 
-    handleResize(); // Initial check
+    handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -54,68 +49,38 @@ const NFTCarousel = () => {
       { threshold: 0.5 }
     );
 
-    if (carouselRef.current) {
-      observer.observe(carouselRef.current);
-    }
-
-    return () => {
-      if (carouselRef.current) {
-        observer.unobserve(carouselRef.current);
-      }
-    };
+    if (carouselRef.current) observer.observe(carouselRef.current);
+    return () => carouselRef.current && observer.unobserve(carouselRef.current);
   }, []);
 
-  // Simple navigation functions with basic animation control
   const prevSlide = () => {
-    if (isAnimating) return;
-
-    setIsAnimating(true);
-    setStartIndex((prevIndex) => {
-      const newIndex = prevIndex - 1;
-      return newIndex < 0 ? nfts.length - visibleCount : newIndex;
-    });
-
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 400);
+    setStartIndex(prev => (prev - 1 < 0 ? nfts.length - visibleCount : prev - 1));
   };
 
   const nextSlide = () => {
-    if (isAnimating) return;
-
-    setIsAnimating(true);
-    setStartIndex((prevIndex) => {
-      const maxStartIndex = nfts.length - visibleCount;
-      const newIndex = prevIndex + 1;
-      return newIndex > maxStartIndex ? 0 : newIndex;
-    });
-
-    setTimeout(() => {
-      setIsAnimating(false);
-    }, 400);
+    setStartIndex(prev => (prev + 1 > nfts.length - visibleCount ? 0 : prev + 1));
   };
 
   // Get the current visible NFTs
   const visibleNfts = () => {
     const result = [];
     for (let i = 0; i < visibleCount; i++) {
-      const index = (startIndex + i) % nfts.length;
-      result.push(nfts[index]);
+      result.push(nfts[(startIndex + i) % nfts.length]);
     }
     return result;
   };
 
   return (
-    <div className="h-screen w-full bg-gradient-to-br from-black via-gray-900 to-red-950 flex flex-col items-center justify-center px-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-black via-gray-900 to-red-950 flex flex-col items-center justify-center px-4 py-8 overflow-hidden">
       {/* Title Section */}
-      <div className={`w-full max-w-6xl mb-12 md:mb-16 text-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
-        <h2 className="font-['Playfair_Display'] text-3xl md:text-4xl lg:text-5xl text-white mb-6 relative inline-block">
+      <div className={`w-full max-w-6xl mb-8 md:mb-12 text-center transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <h2 className="font-['Playfair_Display'] text-2xl md:text-4xl lg:text-5xl text-white mb-4 md:mb-6 relative inline-block">
           <span className="relative z-10 bg-clip-text text-transparent bg-gradient-to-r from-white to-orange-500 animate-wave">
             Top NFT Collection
           </span>
-          <span className="absolute -bottom-2 md:-bottom-3 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-orange-500"></span>
+          <span className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-red-600 to-orange-500"></span>
         </h2>
-        <p className="font-['Poppins'] text-gray-400 max-w-2xl mx-auto text-sm md:text-base mt-4">
+        <p className="font-['Poppins'] text-gray-400 max-w-2xl mx-auto text-xs md:text-base mt-2 md:mt-4">
           Discover the most exclusive and valuable digital collectibles in the NFT space
         </p>
       </div>
@@ -124,80 +89,63 @@ const NFTCarousel = () => {
         {/* Navigation buttons */}
         <button
           onClick={prevSlide}
-          className={`absolute -left-4 sm:-left-6 md:-left-8 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 sm:p-3 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10 ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-8'
-          }`}
-          style={{ transitionDelay: '250ms' }}
-          disabled={isAnimating}
+          className="absolute -left-2 sm:-left-6 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10"
           aria-label="Previous NFT"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
 
         <button
           onClick={nextSlide}
-          className={`absolute -right-4 sm:-right-6 md:-right-8 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 sm:p-3 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10 ${
-            isVisible ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-8'
-          }`}
-          style={{ transitionDelay: '250ms' }}
-          disabled={isAnimating}
+          className="absolute -right-2 sm:-right-6 top-1/2 transform -translate-y-1/2 bg-black bg-opacity-70 text-orange-500 p-2 rounded-full hover:bg-red-900 transition-colors duration-300 focus:outline-none z-10"
           aria-label="Next NFT"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 sm:h-8 sm:w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
           </svg>
         </button>
 
         <div className="relative">
           {/* NFT display area */}
-          <div className="flex justify-center sm:justify-between gap-4 py-6 md:py-12">
+          <div className="flex justify-center sm:justify-between gap-2 sm:gap-4 py-4 md:py-8">
             {visibleNfts().map((nft, idx) => (
               <div
                 key={`${nft.id}-${startIndex}`}
                 className={`${
-                  visibleCount === 1 ? 'w-4/5' :
-                  visibleCount === 2 ? 'w-1/2' : 'w-1/3'
+                  visibleCount === 1 ? 'w-full sm:w-4/5' : visibleCount === 2 ? 'w-1/2' : 'w-1/3'
                 } flex flex-col transition-all duration-500 ${
-                  isVisible
-                    ? 'opacity-100 translate-y-0'
-                    : 'opacity-0 translate-y-16'
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16'
                 }`}
-                style={{
-                  transitionDelay: `${idx * 150}ms`,
-                }}
+                style={{ transitionDelay: `${idx * 150}ms` }}
               >
                 <div className="bg-gradient-to-r from-red-800 via-orange-800 to-red-700 p-0.5 rounded-lg shadow-lg hover:shadow-red-500/20 h-full">
                   <div className="bg-black rounded-lg overflow-hidden flex flex-col h-full">
-                    {/* SVG image with orange filter */}
                     <div className="w-full overflow-hidden">
                       <img
                         src={nft.image}
                         alt={nft.name}
                         className="w-full h-auto object-contain transition-transform duration-300 hover:scale-110"
-                        style={{
-                          filter: 'brightness(1.2) saturate(1.5) hue-rotate(-20deg)',
-                        }}
+                        style={{ filter: 'brightness(1.2) saturate(1.5) hue-rotate(-20deg)' }}
                       />
                     </div>
-                    {/* NFT info */}
-                    <div className="p-4 md:p-5 lg:p-6 flex-grow flex flex-col">
-                      <div className="flex justify-between items-center mb-3 md:mb-4">
-                        <h3 className="text-orange-500 font-['Poppins'] font-bold text-sm md:text-lg">{nft.name}</h3>
-                        <span className="text-red-400 font-['Poppins'] font-bold text-sm md:text-base">{nft.price}</span>
+                    <div className="p-3 sm:p-4 md:p-5 flex-grow flex flex-col">
+                      <div className="flex justify-between items-center mb-2 md:mb-3">
+                        <h3 className="text-orange-500 font-['Poppins'] font-bold text-xs sm:text-sm md:text-lg truncate">{nft.name}</h3>
+                        <span className="text-red-400 font-['Poppins'] font-bold text-xs sm:text-sm md:text-base">{nft.price}</span>
                       </div>
-                      <div className="border-t border-gray-800 pt-3 mt-3">
-                        <div className="flex justify-between items-center mb-2">
+                      <div className="border-t border-gray-800 pt-2 mt-2 md:pt-3 md:mt-3">
+                        <div className="flex justify-between items-center mb-1 md:mb-2">
                           <span className="text-gray-500 font-['Poppins'] text-xs">Creator</span>
-                          <span className="text-orange-300 font-['Poppins'] text-xs font-mono">{nft.creator}</span>
+                          <span className="text-orange-300 font-['Poppins'] text-xs truncate">{nft.creator}</span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-gray-500 font-['Poppins'] text-xs">Collection</span>
-                          <span className="text-orange-300 font-['Poppins'] text-xs">Premium Series</span>
+                          <span className="text-orange-300 font-['Poppins'] text-xs">Premium</span>
                         </div>
                       </div>
-                      <button className="mt-4 w-full py-2 bg-gradient-to-r from-red-700 to-orange-600 text-white rounded font-['Poppins'] text-sm hover:from-red-600 hover:to-orange-500 transition-all duration-300 hover:shadow-lg hover:shadow-red-900/30">
+                      <button className="mt-3 w-full py-1.5 md:py-2 bg-gradient-to-r from-red-700 to-orange-600 text-white rounded font-['Poppins'] text-xs sm:text-sm hover:from-red-600 hover:to-orange-500 transition-all duration-300">
                         View Details
                       </button>
                     </div>

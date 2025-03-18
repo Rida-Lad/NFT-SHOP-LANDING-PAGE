@@ -130,7 +130,6 @@ const About = () => {
                             Join the Revolution
                             <ArrowRight className="h-5 w-5" />
                         </span>
-                        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 to-red-500" />
                     </button>
                 </div>
             </div>
