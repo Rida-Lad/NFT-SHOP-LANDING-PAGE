@@ -12,6 +12,14 @@
 
 A cutting-edge marketplace for discovering, creating, and trading premium NFTs with a focus on exceptional user experience and visual aesthetics.
 
+## 📸 Screenshots
+
+<div align="center">
+  <img src="./public/screenshots/hero-section.png" width="45%" alt="Hero Section">
+  <img src="./public/screenshots/second.png" width="45%" alt="second section">
+  <img src="./public/screenshots/third.png" width="90%" alt="Third section" style="margin-top: 20px">
+</div>
+
 ## ✨ Features
 
 <div align="center">
